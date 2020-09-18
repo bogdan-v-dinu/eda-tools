@@ -134,7 +134,7 @@ namespace CloudEventsDemo.ConsoleA
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"clouEventsDemo.ConsoleA: failed with exception '{ex.Message}', of type '{ex.GetType().Name}'");
+                Console.WriteLine($"cloudEventsDemo.ConsoleA: failed with exception '{ex.Message}', of type '{ex.GetType().Name}'");
             }
             finally 
             {
