@@ -7,15 +7,14 @@ using System.Linq;
 namespace CloudEventsDemo.Serialization
 {
     /// <summary>
-    /// CloudEvent subscriber adapter 
+    /// Reads from CloudEvent serialized envelopes
     /// </summary>
-    /// <remarks>todo: add a logger</remarks>
-    public class SubAdapter : ICESubAdapter
+    public class CloudEventReader : ICloudEventReader
     {
         /// <summary>
         /// Payload formatters supported by this subscriber. Used to deserialize the actual payload found in the CloudEvent envelope
         /// </summary>
-        protected List<ISubPayloadFormatter> _pLoadFormatters;
+        protected List<IPayloadDeserializationFormatter> _pLoadFormatters;
 
         /// <summary>
         /// Mapping between declarative CloudEvents types (URNs) AND 
@@ -30,9 +29,9 @@ namespace CloudEventsDemo.Serialization
         /// <summary>
         /// Logger interface
         /// </summary>
-        ILogger<SubAdapter> _logger;
+        ILogger<CloudEventReader> _logger;
 
-        public SubAdapter(Dictionary<string, Type> typeMappings, ILogger<SubAdapter> logger)
+        public CloudEventReader(Dictionary<string, Type> typeMappings, ILogger<CloudEventReader> logger)
         {
             #region Check arguments
             if (typeMappings == null || typeMappings.Count == 0)
@@ -43,13 +42,13 @@ namespace CloudEventsDemo.Serialization
 
             this._typeMappings = typeMappings;
             this._logger = logger;
-            this._pLoadFormatters = new List<ISubPayloadFormatter>() { new SubJsonPayloadFormatter() };
+            this._pLoadFormatters = new List<IPayloadDeserializationFormatter>() { new JsonPayloadDeserializationFormatter() };
             this._cEventsFormatter = new JsonEventFormatter();
         }
 
-        #region ICESubAdapter
+        #region ICloudEventReader implementation
 
-        public List<ISubPayloadFormatter> PayloadFormatters 
+        public List<IPayloadDeserializationFormatter> PayloadFormatters 
         {
             get { return _pLoadFormatters; }
         }
@@ -64,22 +63,19 @@ namespace CloudEventsDemo.Serialization
                 {
                     cEvent = _cEventsFormatter.DecodeStructuredEvent(cEventBytes, null);
                     // info
-                    _logger.LogInformation($"SubAdapter.GetCloudEvent: CloudEvents envelope specversion='{cEvent.SpecVersion}' type='{cEvent.Type}' source='{cEvent.Source.ToString()}' id='{cEvent.Id}' subject='{cEvent.Subject ?? "NA"}' content-type='{cEvent.DataContentType.MediaType}'");
-                    //Console.WriteLine($"SubAdapter.GetCloudEvent: CloudEvents envelope specversion='{cEvent.SpecVersion}' type='{cEvent.Type}' source='{cEvent.Source.ToString()}' id='{cEvent.Id}' subject='{cEvent.Subject ?? "NA"}' content-type='{cEvent.DataContentType.MediaType}'");
+                    _logger.LogInformation($"GetCloudEvent: CloudEvents envelope specversion='{cEvent.SpecVersion}' type='{cEvent.Type}' source='{cEvent.Source.ToString()}' id='{cEvent.Id}' subject='{cEvent.Subject ?? "NA"}' content-type='{cEvent.DataContentType.MediaType}'");
                 }
                 catch (Exception ex)
                 {
                     // err
-                    _logger.LogError($"SubAdapter.GetCloudEvent: failed with exception '{ex.Message}', of type '{ex.GetType().Name}'");
-                    //Console.WriteLine($"SubAdapter.GetCloudEvent: failed with exception '{ex.Message}', of type '{ex.GetType().Name}'");
-                    throw new SubAppException("SubAdapter.GetCloudEvent", ex);
+                    _logger.LogError($"GetCloudEvent: failed with exception '{ex.Message}', of type '{ex.GetType().Name}'");
+                    throw new CloudEventReaderException("GetCloudEvent", ex);
                 }
             }
             else
             {
                 // warn
-                _logger.LogWarning("SubAdapter.GetCloudEvent: specified byte array is empty");
-                //Console.WriteLine("SubAdapter.GetCloudEvent: specified byte array is empty"); 
+                _logger.LogWarning("GetCloudEvent: specified byte array is empty");
             }
 
             return cEvent;
@@ -108,30 +104,26 @@ namespace CloudEventsDemo.Serialization
                     }
 
                     // debug/ max verbosity
-                    _logger.LogDebug($"SubAdapter.GetPayload: received CloudEvents Data as UTF8 string = '{cEvent.Data as string}'");
-                    //Console.WriteLine($"SubAdapter.GetPayload: received CloudEvents Data as UTF8 string = '{cEvent.Data as string}'");
+                    _logger.LogDebug($"GetPayload: received CloudEvents Data as UTF8 string = '{cEvent.Data as string}'");
 
                     pLoadObj = pLoadFormatter.Deserialize(cEvent.Data, subscriberType, pLoadContentType);
                 }
                 catch (ArgumentException agEx)
                 {
                     // warn
-                    _logger.LogWarning($"SubAdapter.GetPayload: cannot retrieve the payload from a CloudEvent due to unknown envelope params - '{agEx.Message}'");
-                    //Console.WriteLine($"SubAdapter.GetPayload: cannot retrieve the payload from a CloudEvent due to unknown envelope params - '{agEx.Message}'");
+                    _logger.LogWarning($"GetPayload: cannot retrieve the payload from a CloudEvent due to unknown envelope params - '{agEx.Message}'");
                 }
                 catch (Exception ex)
                 {
                     // err
-                    _logger.LogError($"SubAdapter.GetPayload: failed with exception '{ex.Message}', of type '{ex.GetType().Name}'");
-                    //Console.WriteLine($"SubAdapter.GetPayload: failed with exception '{ex.Message}', of type '{ex.GetType().Name}'");
-                    throw new SubAppException("SubAdapter.GetCloudEvent", ex);
+                    _logger.LogError($"GetPayload: failed with exception '{ex.Message}', of type '{ex.GetType().Name}'");
+                    throw new CloudEventReaderException("SubAdapter.GetCloudEvent", ex);
                 }
             }
             else
             {
                 // warn
-                _logger.LogWarning("SubAdapter.GetPayload: specified CloudEvent is empty");
-                //Console.WriteLine("SubAdapter.GetPayload: specified CloudEvent is empty");
+                _logger.LogWarning("GetPayload: specified CloudEvent is empty");
             }
 
             return pLoadObj;

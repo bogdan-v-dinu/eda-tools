@@ -10,16 +10,15 @@ using System.Text;
 namespace CloudEventsDemo.Serialization
 {
     /// <summary>
-    /// CloudEvent publisher adapter
+    /// Generates serialized CloudEvent envelopes
     /// </summary>
-    /// <remarks>todo: add a logger</remarks>
-    public class PubAdapter : ICEPubAdapter
+    public class CloudEventWriter : ICloudEventWriter
     {
         /// <summary>
         /// Payload formatters supported by this publisher. Used to serialize the actual payload placed in a CloudEvent envelope 
         /// and to determine its underlying content type
         /// </summary>
-        protected List<IPubPayloadFormatter> _pLoadFormatters;
+        protected List<IPayloadSerializationFormatter> _pLoadFormatters;
 
         /// <summary>
         /// Mapper from .NET payload types to declarative CloudEvent types
@@ -44,14 +43,14 @@ namespace CloudEventsDemo.Serialization
         /// <summary>
         /// Logger interface
         /// </summary>
-        ILogger<PubAdapter> _logger;
+        ILogger<CloudEventWriter> _logger;
 
-        public PubAdapter(ILogger<PubAdapter> logger) 
+        public CloudEventWriter(ILogger<CloudEventWriter> logger) 
             : this("cloud-events", new Uri("http://cloud-events-demo.com"), logger)
         { 
         }
 
-        public PubAdapter(string eventTypeUrnAuthority, Uri eventSource, ILogger<PubAdapter> logger)
+        public CloudEventWriter(string eventTypeUrnAuthority, Uri eventSource, ILogger<CloudEventWriter> logger)
         {
             #region Check arguments
             if (String.IsNullOrWhiteSpace(eventTypeUrnAuthority))
@@ -64,7 +63,7 @@ namespace CloudEventsDemo.Serialization
             }
             #endregion
 
-            this._pLoadFormatters = new List<IPubPayloadFormatter>() { new PubJsonPayloadFormatter() };
+            this._pLoadFormatters = new List<IPayloadSerializationFormatter>() { new JsonPayloadSerializationFormatter() };
             this._declarativeTypeMapper = Utils.ConvertPascalToKebabCase;
             this._eventTypeUrnAuthority = eventTypeUrnAuthority.ToLower();
             this._eventSource = eventSource;
@@ -72,9 +71,9 @@ namespace CloudEventsDemo.Serialization
             this._logger = logger;
         }
 
-        #region ICEPubAdapter implementation
+        #region ICloudEventWriter implementation
 
-        public List<IPubPayloadFormatter> PayloadFormatters 
+        public List<IPayloadSerializationFormatter> PayloadFormatters 
         {
             get
             {
@@ -125,24 +124,24 @@ namespace CloudEventsDemo.Serialization
                     };
 
                     // info
-                    _logger.LogInformation($"PubAdapter.GetCloudEvent: created CloudEvents envelope specversion='{cEvent.SpecVersion}' type='{cEvent.Type}' source='{cEvent.Source.ToString()}' id='{cEvent.Id}' subject='{cEvent.Subject ?? "NA"}' content-type='{cEvent.DataContentType.MediaType}'");
+                    _logger.LogInformation($"GetCloudEvent: created CloudEvents envelope specversion='{cEvent.SpecVersion}' type='{cEvent.Type}' source='{cEvent.Source.ToString()}' id='{cEvent.Id}' subject='{cEvent.Subject ?? "NA"}' content-type='{cEvent.DataContentType.MediaType}'");
                 }
                 catch (ArgumentException agEx)
                 {
                     // warn
-                    _logger.LogWarning($"PubAdapter.GetCloudEvent: cannot add the payload into a CloudEvent - '{agEx.Message}'");
+                    _logger.LogWarning($"GetCloudEvent: cannot add the payload into a CloudEvent - '{agEx.Message}'");
                 }
                 catch (Exception ex)
                 {
                     // err
-                    _logger.LogError($"PubAdapter.GetCloudEvent: failed with exception '{ex.Message}', of type '{ex.GetType().Name}'");
-                    throw new PubAppException("PubAdapter.GetCloudEvent", ex);
+                    _logger.LogError($"GetCloudEvent: failed with exception '{ex.Message}', of type '{ex.GetType().Name}'");
+                    throw new CloudEventWriterException("GetCloudEvent", ex);
                 }
             }
             else
             {
                 // warn
-                _logger.LogWarning("PubAdapter.GetCloudEvent: specified payload of type '{typeof(T)}' is empty");
+                _logger.LogWarning("GetCloudEvent: specified payload of type '{typeof(T)}' is empty");
             }
             
             return cEvent;
@@ -159,21 +158,21 @@ namespace CloudEventsDemo.Serialization
                 {
                     cEventBytes = _cEventsFormatter.EncodeStructuredEvent(cEvent, out formatterContentType); // no async 
                     // info
-                    _logger.LogInformation($"PubAdapter.GetBytes: generated {cEventBytes.Length} bytes with formatter content type {formatterContentType.MediaType}");
+                    _logger.LogInformation($"GetBytes: generated {cEventBytes.Length} bytes with formatter content type {formatterContentType.MediaType}");
                     // debug/ max verbosity
-                    _logger.LogDebug($"PubAdapter.GetBytes: CloudEvent with envelope and full content {Environment.NewLine}{Encoding.UTF8.GetString(cEventBytes)}");
+                    _logger.LogDebug($"GetBytes: CloudEvent with envelope and full content {Environment.NewLine}{Encoding.UTF8.GetString(cEventBytes)}");
                 }
                 catch (Exception ex)
                 {
                     // err
-                    _logger.LogError($"PubAdapter.GetBytes: failed with exception '{ex.Message}', of type '{ex.GetType().Name}'");
-                    throw new PubAppException("PubAdapter.GetBytes", ex);
+                    _logger.LogError($"GetBytes: failed with exception '{ex.Message}', of type '{ex.GetType().Name}'");
+                    throw new CloudEventWriterException("GetBytes", ex);
                 }
             }
             else
             {
                 // warn
-                _logger.LogWarning("PubAdapter.GetBytes: specified CloudEvent is empty");
+                _logger.LogWarning("GetBytes: specified CloudEvent is empty");
             }
 
             return cEventBytes;

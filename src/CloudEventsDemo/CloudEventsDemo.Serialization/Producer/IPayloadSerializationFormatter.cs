@@ -1,9 +1,9 @@
 ﻿namespace CloudEventsDemo.Serialization
 {
     /// <summary>
-    /// Publisher payload formatter interface
+    /// Payload serialization formatter interface
     /// </summary>
-    public interface IPubPayloadFormatter
+    public interface IPayloadSerializationFormatter
     {
         string SerializedContentType { get;  }
         object Serialize<T>(T pLoad);

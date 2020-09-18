@@ -3,9 +3,9 @@
 namespace CloudEventsDemo.Serialization
 {
     /// <summary>
-    /// Subscriber payload formatter interface
+    /// Payload deserialization formatter interface
     /// </summary>
-    public interface ISubPayloadFormatter
+    public interface IPayloadDeserializationFormatter
     {
         bool CanDeserialize(string contentType);
         object Deserialize(object pLoad, Type pType, string contentType);

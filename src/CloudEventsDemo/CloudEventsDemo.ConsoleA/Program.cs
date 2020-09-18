@@ -68,15 +68,15 @@ namespace CloudEventsDemo.ConsoleA
                            })
                            .AddDebug()
                     )
-                    .AddTransient<ICEPubAdapter, PubAdapter>(sp =>
+                    .AddTransient<ICloudEventWriter, CloudEventWriter>(sp =>
                     {
-                        return new PubAdapter("my-app", new Uri("http://cloud-events-demo.com/console-a"),
-                            sp.GetRequiredService<ILogger<PubAdapter>>());
+                        return new CloudEventWriter("my-app", new Uri("http://cloud-events-demo.com/console-a"),
+                            sp.GetRequiredService<ILogger<CloudEventWriter>>());
                     })
-                    .AddTransient<ICESubAdapter, SubAdapter>(sp =>
+                    .AddTransient<ICloudEventReader, CloudEventReader>(sp =>
                     {
-                        return new SubAdapter(subscriberTypeMappings,
-                            sp.GetRequiredService<ILogger<SubAdapter>>());
+                        return new CloudEventReader(subscriberTypeMappings,
+                            sp.GetRequiredService<ILogger<CloudEventReader>>());
                     });
                 });
 
@@ -89,23 +89,23 @@ namespace CloudEventsDemo.ConsoleA
             ConsumerPayload consumerPayload;
             string eventWithEnvelope;
 
-            var publisherAdapter = HostHelpers.serviceProvider.GetService<ICEPubAdapter>();
-            var subscriberAdapter = HostHelpers.serviceProvider.GetService<ICESubAdapter>();
+            var ceWriter = HostHelpers.serviceProvider.GetService<ICloudEventWriter>();
+            var ceReader = HostHelpers.serviceProvider.GetService<ICloudEventReader>();
 
             // to see the full envelope and payload sent to the transport-specific broker, set logger verbosity to "Debug"
-            eventBytes = publisherAdapter.GetBytes<BasicPayload>(p1,
+            eventBytes = ceWriter.GetBytes<BasicPayload>(p1,
                 eventSubject: $"New event with basic payload, id = {p1.Id}");
-            consumerPayload = subscriberAdapter.GetPayload(eventBytes) as ConsumerPayload;
+            consumerPayload = ceReader.GetPayload(eventBytes) as ConsumerPayload;
             Console.WriteLine();
 
-            eventBytes = publisherAdapter.GetBytes<ExtendedPayload>(p2,
+            eventBytes = ceWriter.GetBytes<ExtendedPayload>(p2,
                 eventSubject: $"New event with extended payload, id = {p2.Id}");
-            consumerPayload = subscriberAdapter.GetPayload(eventBytes) as ConsumerPayload;
+            consumerPayload = ceReader.GetPayload(eventBytes) as ConsumerPayload;
             Console.WriteLine();
 
-            eventBytes = publisherAdapter.GetBytes<KeyValuePair<string, string>>(new KeyValuePair<string, string>("pKey", "pValue"),
+            eventBytes = ceWriter.GetBytes<KeyValuePair<string, string>>(new KeyValuePair<string, string>("pKey", "pValue"),
                 eventSubject: $"New event without a consumer type mapping");
-            consumerPayload = subscriberAdapter.GetPayload(eventBytes) as ConsumerPayload; // null
+            consumerPayload = ceReader.GetPayload(eventBytes) as ConsumerPayload; // null
             Console.WriteLine();
 
             await Task.CompletedTask;

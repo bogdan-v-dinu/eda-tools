@@ -6,10 +6,10 @@ namespace CloudEventsDemo.Serialization
     /// <summary>
     /// Formatter able to serialize payloads with "application/json" content type
     /// </summary>
-    public class PubJsonPayloadFormatter : IPubPayloadFormatter
+    public class JsonPayloadSerializationFormatter : IPayloadSerializationFormatter
     {
-        #region IPubPayloadFormatter region
-        
+        #region IPayloadSerializationFormatter implementation
+
         public string SerializedContentType 
         {
             get

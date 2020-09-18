@@ -4,11 +4,11 @@ using System.Collections.Generic;
 namespace CloudEventsDemo.Serialization
 {
     /// <summary>
-    /// CloudEvent publisher adapter interface
+    /// Interface for generating/writing serialized CloudEvent envelopes
     /// </summary>
-    public interface ICEPubAdapter
+    public interface ICloudEventWriter
     {
-        List<IPubPayloadFormatter> PayloadFormatters { get; }
+        List<IPayloadSerializationFormatter> PayloadFormatters { get; }
         CloudEvent GetCloudEvent<T>(T pLoad, string pLoadId = null, string pLoadType = null, 
             string eventSubject = null, string targetContentType = null);
         byte[] GetBytes(CloudEvent cEvent);

@@ -8,19 +8,19 @@ namespace CloudEventsDemo.Serialization
     /// <summary>
     /// Formatter able to deserialize payloads with "application/json" content type
     /// </summary>
-    public class SubJsonPayloadFormatter : ISubPayloadFormatter
+    public class JsonPayloadDeserializationFormatter : IPayloadDeserializationFormatter
     {
         /// <summary>
         /// Supported content types
         /// </summary>
         protected List<string> _contentTypes;
         
-        public SubJsonPayloadFormatter()
+        public JsonPayloadDeserializationFormatter()
         {
             _contentTypes = new List<string>() { MediaTypeNames.Application.Json };
         }
 
-        #region ISubPayloadFormatter
+        #region IPayloadDeserializationFormatter implementation
 
         public bool CanDeserialize(string contentType)
         {
