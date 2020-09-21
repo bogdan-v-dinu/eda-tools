@@ -71,9 +71,8 @@ namespace CloudEventsDemo.ConsoleA
                     )
                     .AddMassTransit(x =>
                     {
-                        x.AddConsumer<TestEventConsumer>();
-                        x.AddConsumer<AEventConsumer>(typeof(AEventConsumerDefinition));
-
+                        // figure out how to create consumers and inject ctor params from the DI service provider
+                        // x.AddConsumer<AEventConsumer>(cfg => { new AEventConsumer(...)})
                         x.SetKebabCaseEndpointNameFormatter();
 
                         x.UsingInMemory((context, cfg) =>
@@ -83,7 +82,7 @@ namespace CloudEventsDemo.ConsoleA
                             cfg.ConfigureEndpoints(context);
                         });
 
-                        // x.AddConsumersFromNamespaceContaining<AddConsumersMarker>(); // add all consumers found in cloudEventsDemo.ConsoleA
+                        x.AddConsumersFromNamespaceContaining<AddConsumersMarker>(); // add all consumers found in cloudEventsDemo.ConsoleA
                     })
                     .AddTransient<ICloudEventWriter, CloudEventWriter>(sp =>
                     {
@@ -135,12 +134,15 @@ namespace CloudEventsDemo.ConsoleA
         {
             var service = HostHelpers.serviceProvider.GetService<IBusinessService>();
             
+            //await service
+            //    .DoStuff("Request to DoStuff", cancellationSource.Token)
+            //    .ConfigureAwait(false); // publish AEvent with BasicPaylod
+            //await service
+            //    .DoMoreStuff("Request to DoMoreStuff", cancellationSource.Token)
+            //    .ConfigureAwait(false); // publish AEvent with ExtendedPayload
             await service
-                .DoSomeBasicStuff("Request from Program.WorkloadPublishEvents", cancellationSource.Token)
-                .ConfigureAwait(false); // publish AEvent with BasicPaylod
-            await service
-                .DoMoreStuff("Request from Program.WorkloadPublishEvents", cancellationSource.Token)
-                .ConfigureAwait(false); // publish AEvent with ExtendedPayload
+                .DoStuffWithATwist("Request to DoStuffWithATwist", cancellationSource.Token)
+                .ConfigureAwait(false); // publish IGenericEvent<CEvent> with BasicPaylod
 
             //var publishEndpoint = HostHelpers.serviceProvider.GetService<IPublishEndpoint>();
             //await publishEndpoint.Publish<TestEvent>(new

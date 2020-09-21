@@ -14,16 +14,19 @@ namespace CloudEventsDemo.ConsoleA.Publisher
     /// </summary>
     public interface IBusinessService
     {
-        Task DoSomeBasicStuff(string requestContextInfo,
+        Task DoStuff(string requestContextInfo,
             CancellationToken cToken = default(CancellationToken));
 
         Task DoMoreStuff(string requestContextInfo,
             CancellationToken cToken = default(CancellationToken));
+
+        Task DoStuffWithATwist(string requestContextInfo,
+            CancellationToken cToken = default(CancellationToken));
     }
 
     /// <summary>
-    /// Publishes two <see cref="cref="IAEvent">IAEvent</see> events 
-    /// with different payloads: <see cref="cref="BasicPayload">BasicPayload</see> and <see cref="cref="ExtendedPayload">ExtendedPayload</see> respectively
+    /// Publishes two <see cref="cref="AEvent">AEvent</see> events with different payloads: <see cref="cref="BasicPayload">BasicPayload</see> and <see cref="cref="ExtendedPayload">ExtendedPayload</see> respectively.
+    /// Publishes one <see cref="cref="IGenericEvent{CEvent}">IGenericPublisherEvent&lt;CEvent&gt;</see> event with <see cref="cref="BasicPayload">BasicPayload</see>
     /// </summary>
     /// <remarks>
     /// Events are typically published while executing ops associated with a service's business logic
@@ -55,7 +58,7 @@ namespace CloudEventsDemo.ConsoleA.Publisher
 
         #region IBusinessService implementation
 
-        public async Task DoSomeBasicStuff(string requestContextInfo,
+        public async Task DoStuff(string requestContextInfo,
             CancellationToken cToken = default(CancellationToken))
         {
             try
@@ -74,12 +77,12 @@ namespace CloudEventsDemo.ConsoleA.Publisher
                     },
                     cToken);
 
-                _logger.LogInformation($"DoSomeBasicStuff: Published an AEvent with `{basicPayload.GetType().Name}` data; event context '{requestContextInfo}'");
+                _logger.LogInformation($"DoStuff: Published an AEvent with `{basicPayload.GetType().Name}` data; event context '{requestContextInfo}'");
             }
             catch( Exception ex)
             {
                 // err
-                LogException("DoSomeBasicStuff", ex);
+                LogException("DoStuff", ex);
             }
         }
 
@@ -109,6 +112,34 @@ namespace CloudEventsDemo.ConsoleA.Publisher
             {
                 // err
                 LogException("DoMoreStuff", ex);
+            }
+        }
+
+        public async Task DoStuffWithATwist(string requestContextInfo,
+            CancellationToken cToken = default(CancellationToken))
+        {
+            try
+            {
+                var basicPayload = new BasicPayload()
+                {
+                    Id = 1000,
+                    Description = "publisher payload sent with a generic event type",
+                    Tags = new List<string>() { "generic-tag0000", "generic-tag1000", "generic-tag2000", "generic-tag3000" }
+                };
+
+                await _publishEndpoint.Publish<IGenericEvent<CEvent>>(new
+                {
+                    EventData = _ceWriter.GetBytes<BasicPayload>(basicPayload,
+                                            pLoadId: basicPayload.Id.ToString(), eventSubject: requestContextInfo)
+                },
+                    cToken);
+
+                _logger.LogInformation($"DoStuffWithATwist: Published an IGenericEvent<CEvent> with `{basicPayload.GetType().Name}` data; event context '{requestContextInfo}'");
+            }
+            catch (Exception ex)
+            {
+                // err
+                LogException("DoStuffWithATwist", ex);
             }
         }
 

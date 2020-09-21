@@ -5,9 +5,10 @@ using System.Text;
 namespace CloudEventsDemo.Contracts
 {
     /// <summary>
-    /// Generic publisher event with a byte array as event data
+    /// Generic publisher event, with event data stored as a byte array.
+    /// Use with domain-specific events as generic parameter.
     /// </summary>
-    public interface IPublisherEvent
+    public interface IGenericEvent<T>
     {
         byte[] EventData { get; set; }
     }

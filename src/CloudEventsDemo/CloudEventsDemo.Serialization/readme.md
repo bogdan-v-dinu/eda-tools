@@ -22,7 +22,7 @@ Pros/Cons of such a setup are out-of scope for this wiki page.
 ## Producer
 
 1. The payload is formatted (a.k.a serialized) first using an `IPayloadSerializationFormatter` implementation 
-2. The CloudEventWriter selects a formatter based on `targetContentType` param from client API
+2. The CloudEventWriter selects a formatter based on `dataContentType` param from client API
  * FTTB the lib includes just a Json formatter. 
  * others - XML formatter, binary ones - could be added in the future 
 3. The formatter must return either "string", "Stream" or "byte[]", which gets assigned to `Data` param from the CloudEvent envelope.

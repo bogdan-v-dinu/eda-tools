@@ -8,7 +8,7 @@ namespace CloudEventsDemo.ConsoleA
     {
         public AEventConsumerDefinition()
         {
-            ConcurrentMessageLimit = 10; // no of AEvent messages consumed concurrently
+            ConcurrentMessageLimit = 1; // limit no of AEvent messages consumed concurrently for debugging & logging purposes 
         }
 
         protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,

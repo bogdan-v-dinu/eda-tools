@@ -7,7 +7,7 @@ namespace CloudEventsDemo.Contracts
     /// <summary>
     /// Event "A", where A represents a placeholder for the event description
     /// </summary>
-    public interface AEvent : IPublisherEvent
+    public interface AEvent : IEvent
     {
     }
 }

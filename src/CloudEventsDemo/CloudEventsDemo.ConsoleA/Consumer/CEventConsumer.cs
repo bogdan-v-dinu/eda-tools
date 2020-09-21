@@ -7,37 +7,38 @@ using Newtonsoft.Json;
 using System;
 using System.Threading.Tasks;
 
-namespace CloudEventsDemo.ConsoleA
+namespace CloudEventsDemo.ConsoleA.Consumer
 {
-    public class AEventConsumer : IConsumer<AEvent>
+    public class CEventConsumer : IConsumer<IGenericEvent<CEvent>>
     {
         ICloudEventReader _ceReader;
 
-        private readonly ILogger<AEventConsumer> _logger;
+        private readonly ILogger<CEventConsumer> _logger;
 
-        public AEventConsumer()
+        public CEventConsumer()
         {
             this._ceReader = HostHelpers.serviceProvider.GetService<ICloudEventReader>();
-            this._logger = HostHelpers.serviceProvider.GetService<ILogger<AEventConsumer>>();
+            this._logger = HostHelpers.serviceProvider.GetService<ILogger<CEventConsumer>>();
         }
 
-        public AEventConsumer(ICloudEventReader ceReader, ILogger<AEventConsumer> logger)
+        public CEventConsumer(ICloudEventReader ceReader, ILogger<CEventConsumer> logger)
         {
             this._ceReader = ceReader;
             this._logger = logger;
         }
 
-        #region IConsumer<AEvent> implementation
 
-        public async Task Consume(ConsumeContext<AEvent> context)
+        #region IConsumer<IGenericPublisherEvent<CEvent>> implementation
+
+        public async Task Consume(ConsumeContext<IGenericEvent<CEvent>> context)
         {
             try
             {
-                _logger.LogInformation($"Consume: received AEvent with MessageId = '{context.MessageId}'");
+                _logger.LogInformation($"Consume: received IGenericEvent<CEvent> with MessageId = '{context.MessageId}'");
 
                 object payload = _ceReader.GetPayload(context.Message.EventData);
-                
-                switch( payload )
+
+                switch (payload)
                 {
                     case ConsumerPayload consumerPayload:
                         _logger.LogInformation($"Consume: Payload for MessageId '{context.MessageId}' has mapped type = '{consumerPayload.GetType().Name}', content = '{JsonConvert.SerializeObject(consumerPayload)}'");
@@ -47,7 +48,7 @@ namespace CloudEventsDemo.ConsoleA
                         break;
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 var errDetails = ex.InnerException != null ?
                     ex.InnerException.GetType().Name + " - " + ex.InnerException.Message :

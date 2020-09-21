@@ -82,7 +82,7 @@ namespace CloudEventsDemo.Serialization
         }
 
         public CloudEvent GetCloudEvent<T>(T pLoad, string pLoadId = null, string pLoadType = null, 
-            string eventSubject = null, string targetContentType = null)
+            string eventSubject = null, string dataContentType = null)
         {
             CloudEvent cEvent = null;
 
@@ -99,17 +99,17 @@ namespace CloudEventsDemo.Serialization
                     {
                         pLoadType = typeof(T).Name; // use custom formatting for generic type definitions
                     }
-                    if (String.IsNullOrWhiteSpace(targetContentType))
+                    if (String.IsNullOrWhiteSpace(dataContentType))
                     {
-                        targetContentType = "application/json"; // by default serialize as json
+                        dataContentType = "application/json"; // by default serialize as json
                     }
 
                     var declarativeType = System.Uri.EscapeUriString($"urn:{_eventTypeUrnAuthority}:{_declarativeTypeMapper(pLoadType)}");
                     
-                    var pLoadFormatter = _pLoadFormatters.FirstOrDefault(pf => pf.SerializedContentType.Equals(targetContentType));
+                    var pLoadFormatter = _pLoadFormatters.FirstOrDefault(pf => pf.SerializedContentType.Equals(dataContentType));
                     if (pLoadFormatter == null)
                     {
-                        throw new ArgumentException($"No publisher formatter can serialize a payload with content type '{targetContentType}'", "targetContentType");
+                        throw new ArgumentException($"No publisher formatter can serialize a payload with content type '{dataContentType}'", "targetContentType");
                     }
 
                     // create the CloudEvent instance

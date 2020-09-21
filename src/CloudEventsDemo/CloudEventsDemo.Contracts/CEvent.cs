@@ -5,9 +5,10 @@ using System.Text;
 namespace CloudEventsDemo.Contracts
 {
     /// <summary>
-    /// Event "B", where B represents a placeholder for the event description
+    /// Event "C", where C represents a placeholder for the event description.
+    /// Use with IGenericEvent<T>
     /// </summary>
-    public interface BEvent : IEvent
+    public interface CEvent
     {
     }
 }
