@@ -1,11 +1,12 @@
-﻿using CloudEventsDemo.Serialization;
+﻿using CloudEventsDemo.ConsoleA.Publisher;
+using CloudEventsDemo.Serialization;
+using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -68,6 +69,22 @@ namespace CloudEventsDemo.ConsoleA
                            })
                            .AddDebug()
                     )
+                    .AddMassTransit(x =>
+                    {
+                        x.AddConsumer<TestEventConsumer>();
+                        x.AddConsumer<AEventConsumer>(typeof(AEventConsumerDefinition));
+
+                        x.SetKebabCaseEndpointNameFormatter();
+
+                        x.UsingInMemory((context, cfg) =>
+                        {
+                            cfg.TransportConcurrencyLimit = 10;
+
+                            cfg.ConfigureEndpoints(context);
+                        });
+
+                        // x.AddConsumersFromNamespaceContaining<AddConsumersMarker>(); // add all consumers found in cloudEventsDemo.ConsoleA
+                    })
                     .AddTransient<ICloudEventWriter, CloudEventWriter>(sp =>
                     {
                         return new CloudEventWriter("my-app", new Uri("http://cloud-events-demo.com/console-a"),
@@ -77,39 +94,72 @@ namespace CloudEventsDemo.ConsoleA
                     {
                         return new CloudEventReader(subscriberTypeMappings,
                             sp.GetRequiredService<ILogger<CloudEventReader>>());
-                    });
+                    })
+                    .AddTransient<IBusinessService,BusinessService>();
+
+                    services.AddHostedService<MassTransitConsoleHostedService>();
                 });
 
             return builder;
         }
 
-        static async Task Workload(CancellationTokenSource cancellationSource)
+        /// <summary>
+        /// Serialization of CloudEvents envelope, type mappings
+        /// </summary>
+        static void WorkloadSerialization()
         {
             byte[] eventBytes;
-            ConsumerPayload consumerPayload;
-            string eventWithEnvelope;
-
+            ExtendedPayload consumerPayload;
+           
             var ceWriter = HostHelpers.serviceProvider.GetService<ICloudEventWriter>();
             var ceReader = HostHelpers.serviceProvider.GetService<ICloudEventReader>();
 
             // to see the full envelope and payload sent to the transport-specific broker, set logger verbosity to "Debug"
             eventBytes = ceWriter.GetBytes<BasicPayload>(p1,
                 eventSubject: $"New event with basic payload, id = {p1.Id}");
-            consumerPayload = ceReader.GetPayload(eventBytes) as ConsumerPayload;
+            consumerPayload = ceReader.GetPayload(eventBytes) as ExtendedPayload;
             Console.WriteLine();
 
             eventBytes = ceWriter.GetBytes<ExtendedPayload>(p2,
                 eventSubject: $"New event with extended payload, id = {p2.Id}");
-            consumerPayload = ceReader.GetPayload(eventBytes) as ConsumerPayload;
+            consumerPayload = ceReader.GetPayload(eventBytes) as ExtendedPayload;
             Console.WriteLine();
 
             eventBytes = ceWriter.GetBytes<KeyValuePair<string, string>>(new KeyValuePair<string, string>("pKey", "pValue"),
                 eventSubject: $"New event without a consumer type mapping");
-            consumerPayload = ceReader.GetPayload(eventBytes) as ConsumerPayload; // null
+            consumerPayload = ceReader.GetPayload(eventBytes) as ExtendedPayload; // null
             Console.WriteLine();
+        }
 
-            await Task.CompletedTask;
-            cancellationSource.Cancel();
+        static async Task WorkloadPublishEvents(CancellationTokenSource cancellationSource)
+        {
+            var service = HostHelpers.serviceProvider.GetService<IBusinessService>();
+            
+            await service
+                .DoSomeBasicStuff("Request from Program.WorkloadPublishEvents", cancellationSource.Token)
+                .ConfigureAwait(false); // publish AEvent with BasicPaylod
+            await service
+                .DoMoreStuff("Request from Program.WorkloadPublishEvents", cancellationSource.Token)
+                .ConfigureAwait(false); // publish AEvent with ExtendedPayload
+
+            //var publishEndpoint = HostHelpers.serviceProvider.GetService<IPublishEndpoint>();
+            //await publishEndpoint.Publish<TestEvent>(new
+            //    {
+            //        Id = 1
+            //    },
+            //    cancellationSource.Token);
+        }
+
+        static async Task Workload(CancellationTokenSource cancellationSource)
+        {
+            // > serialization of CloudEvents envelope, type mappings
+            // WorkloadSerialization(); 
+
+            // > putting it all together with MassTransit
+            await WorkloadPublishEvents(cancellationSource)
+                .ConfigureAwait(false); 
+
+            // cancellationSource.Cancel();
         }
 
         static void Main(string[] args)
@@ -127,7 +177,7 @@ namespace CloudEventsDemo.ConsoleA
                     hostBuilder.UseConsoleLifetime()
                         .Build()
                         .GetServiceProvider()
-                        .RunAsync(cancelToken),//RunConsoleAsync(cancelToken) + custom handling to retain the service provider
+                        .RunAsync(cancelToken),//RunConsoleAsync(cancelToken) + custom handling to get the service provider
                     Workload(cancelSrc)
                 });
 
