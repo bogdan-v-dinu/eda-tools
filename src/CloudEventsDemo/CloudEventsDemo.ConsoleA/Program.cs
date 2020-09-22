@@ -7,6 +7,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -133,23 +135,16 @@ namespace CloudEventsDemo.ConsoleA
         static async Task WorkloadPublishEvents(CancellationTokenSource cancellationSource)
         {
             var service = HostHelpers.serviceProvider.GetService<IBusinessService>();
-            
-            //await service
-            //    .DoStuff("Request to DoStuff", cancellationSource.Token)
-            //    .ConfigureAwait(false); // publish AEvent with BasicPaylod
-            //await service
-            //    .DoMoreStuff("Request to DoMoreStuff", cancellationSource.Token)
-            //    .ConfigureAwait(false); // publish AEvent with ExtendedPayload
+
+            await service
+                .DoStuff("Request to DoStuff", cancellationSource.Token)
+                .ConfigureAwait(false); // publish AEvent with BasicPaylod
+            await service
+                .DoMoreStuff("Request to DoMoreStuff", cancellationSource.Token)
+                .ConfigureAwait(false); // publish AEvent with ExtendedPayload
             await service
                 .DoStuffWithATwist("Request to DoStuffWithATwist", cancellationSource.Token)
                 .ConfigureAwait(false); // publish IGenericEvent<CEvent> with BasicPaylod
-
-            //var publishEndpoint = HostHelpers.serviceProvider.GetService<IPublishEndpoint>();
-            //await publishEndpoint.Publish<TestEvent>(new
-            //    {
-            //        Id = 1
-            //    },
-            //    cancellationSource.Token);
         }
 
         static async Task Workload(CancellationTokenSource cancellationSource)

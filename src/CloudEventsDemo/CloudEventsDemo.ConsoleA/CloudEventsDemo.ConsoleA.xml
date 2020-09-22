@@ -1,0 +1,323 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>CloudEventsDemo.ConsoleA</name>
+    </assembly>
+    <members>
+        <member name="T:CloudEventsDemo.ConsoleA.AddConsumersMarker">
+            <summary>
+            Marker for MassTransit automatic client configuration.
+            Used with MassTransit.RegistrationExtensions.AddConsumersFromNamespaceContaining&lt;T&gt;
+            </summary>
+        </member>
+        <member name="T:CloudEventsDemo.ConsoleA.AEventConsumer">
+            <summary>
+            Sample consumer for events of type AEvent
+            </summary>
+        </member>
+        <member name="M:CloudEventsDemo.ConsoleA.AEventConsumer.#ctor">
+            <summary>
+            Default ctor
+            </summary>
+        </member>
+        <member name="M:CloudEventsDemo.ConsoleA.AEventConsumer.#ctor(CloudEventsDemo.Serialization.ICloudEventReader,Microsoft.Extensions.Logging.ILogger{CloudEventsDemo.ConsoleA.AEventConsumer})">
+            <summary>
+            Ctor with CloudEvent(s) reader and logger
+            </summary>
+            <param name="ceReader"></param>
+            <param name="logger"></param>
+        </member>
+        <member name="M:CloudEventsDemo.ConsoleA.AEventConsumer.Consume(MassTransit.ConsumeContext{CloudEventsDemo.ProducerContracts.AEvent})">
+            <summary>
+            Consume <see cref="T:CloudEventsDemo.ProducerContracts.AEvent">AEvent(s)</see> 
+            </summary>
+            <param name="context"></param>
+            <returns></returns>
+        </member>
+        <member name="T:CloudEventsDemo.ConsoleA.AEventConsumerDefinition">
+            <summary>
+            A consumer definition can be used for explicit consumer registration and configuration
+            </summary>
+        </member>
+        <member name="M:CloudEventsDemo.ConsoleA.AEventConsumerDefinition.#ctor">
+            <summary>
+            Default ctor
+            </summary>
+        </member>
+        <member name="M:CloudEventsDemo.ConsoleA.AEventConsumerDefinition.ConfigureConsumer(MassTransit.IReceiveEndpointConfigurator,MassTransit.ConsumeConfigurators.IConsumerConfigurator{CloudEventsDemo.ConsoleA.AEventConsumer})">
+            <summary>
+            Configure consumer
+            </summary>
+            <param name="endpointConfigurator"></param>
+            <param name="consumerConfigurator"></param>
+        </member>
+        <member name="T:CloudEventsDemo.ConsoleA.CEventConsumer">
+            <summary>
+            Sample consumer for events of type IGenericEvent&lt;CEvent&gt;
+            </summary>
+        </member>
+        <member name="M:CloudEventsDemo.ConsoleA.CEventConsumer.#ctor">
+            <summary>
+            Default ctor
+            </summary>
+        </member>
+        <member name="M:CloudEventsDemo.ConsoleA.CEventConsumer.#ctor(CloudEventsDemo.Serialization.ICloudEventReader,Microsoft.Extensions.Logging.ILogger{CloudEventsDemo.ConsoleA.CEventConsumer})">
+            <summary>
+            Default ctor
+            </summary>
+            <param name="ceReader"></param>
+            <param name="logger"></param>
+        </member>
+        <member name="M:CloudEventsDemo.ConsoleA.CEventConsumer.Consume(MassTransit.ConsumeContext{CloudEventsDemo.Contracts.IGenericEvent{CloudEventsDemo.ProducerContracts.CEvent}})">
+            <summary>
+            Consume <see cref="T:CloudEventsDemo.Contracts.IGenericEvent`1"/> where T is <see cref="T:CloudEventsDemo.ProducerContracts.CEvent"/>
+            </summary>
+            <param name="context"></param>
+            <returns></returns>
+        </member>
+        <member name="T:CloudEventsDemo.ConsoleA.ConsumerPayload">
+            <summary>
+            Sample consumer payload. 
+            Matches publisher's <see cref="T:CloudEventsDemo.ConsoleA.BasicPayload">basic payload</see>, without any contract sharing/coupling
+            </summary>
+        </member>
+        <member name="M:CloudEventsDemo.ConsoleA.ConsumerPayload.#ctor">
+            <summary>
+            Default ctor
+            </summary>
+        </member>
+        <member name="P:CloudEventsDemo.ConsoleA.ConsumerPayload.Id">
+            <summary>
+            Id
+            </summary>
+        </member>
+        <member name="P:CloudEventsDemo.ConsoleA.ConsumerPayload.Description">
+            <summary>
+            Description
+            </summary>
+        </member>
+        <member name="P:CloudEventsDemo.ConsoleA.ConsumerPayload.Tags">
+            <summary>
+            Collection of tags
+            </summary>
+        </member>
+        <member name="T:CloudEventsDemo.ConsoleA.EventConsumer`1">
+            <summary>
+            Abstract base class for event consumers working with CloudEvents.
+            Defined in the scope/domain of a consumer process
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="F:CloudEventsDemo.ConsoleA.EventConsumer`1._ceReader">
+            <summary>
+            Reader for CloudEvent envelopes
+            </summary>
+        </member>
+        <member name="F:CloudEventsDemo.ConsoleA.EventConsumer`1._logger">
+            <summary>
+            Logger
+            </summary>
+        </member>
+        <member name="M:CloudEventsDemo.ConsoleA.EventConsumer`1.#ctor">
+            <summary>
+            Default ctor
+            </summary>
+        </member>
+        <member name="M:CloudEventsDemo.ConsoleA.EventConsumer`1.#ctor(CloudEventsDemo.Serialization.ICloudEventReader,Microsoft.Extensions.Logging.ILogger{CloudEventsDemo.ConsoleA.EventConsumer{`0}})">
+            <summary>
+            Ctor with CloudEvent(s) reader and logger
+            </summary>
+            <param name="ceReader"></param>
+            <param name="logger"></param>
+        </member>
+        <member name="M:CloudEventsDemo.ConsoleA.EventConsumer`1.ConsumeCloudEvent(MassTransit.ConsumeContext{`0},System.Action{System.Object})">
+            <summary>
+            Perform a synchronous operation with the CloudEvent payload
+            </summary>
+            <param name="context"></param>
+            <param name="action"></param>
+            <returns></returns>
+        </member>
+        <member name="M:CloudEventsDemo.ConsoleA.EventConsumer`1.ConsumeCloudEvent(MassTransit.ConsumeContext{`0},System.Func{System.Object,System.Threading.Tasks.Task})">
+            <summary>
+            Perform an asynchronous operation with the CloudEvent payload
+            </summary>
+            <param name="context"></param>
+            <param name="asyncAction"></param>
+            <returns></returns>
+        </member>
+        <member name="M:CloudEventsDemo.ConsoleA.EventConsumer`1.Consume(MassTransit.ConsumeContext{`0})">
+            <summary>
+            Abstract consumer for an event of type <see cref="T:CloudEventsDemo.Contracts.IEvent"/>
+            </summary>
+            <param name="context"></param>
+            <returns></returns>
+        </member>
+        <member name="T:CloudEventsDemo.ConsoleA.HostHelpers">
+            <summary>
+            Generic host helpers
+            </summary>
+        </member>
+        <member name="F:CloudEventsDemo.ConsoleA.HostHelpers.serviceProvider">
+            <summary>
+            Service provider
+            </summary>
+        </member>
+        <member name="M:CloudEventsDemo.ConsoleA.HostHelpers.GetServiceProvider(Microsoft.Extensions.Hosting.IHost)">
+            <summary>
+            Get the service provider from the <see cref="T:Microsoft.Extensions.Hosting.IHost"/>
+            </summary>
+            <param name="host"></param>
+            <returns></returns>
+        </member>
+        <member name="T:CloudEventsDemo.ConsoleA.MassTransitConsoleHostedService">
+            <summary>
+            Bootstraps the MassTransit bus control
+            </summary>
+        </member>
+        <member name="M:CloudEventsDemo.ConsoleA.MassTransitConsoleHostedService.#ctor(MassTransit.IBusControl,Microsoft.Extensions.Logging.ILoggerFactory)">
+            <summary>
+            Ctor with bus control and logger
+            </summary>
+            <param name="bus"></param>
+            <param name="loggerFactory"></param>
+        </member>
+        <member name="M:CloudEventsDemo.ConsoleA.MassTransitConsoleHostedService.StartAsync(System.Threading.CancellationToken)">
+            <summary>
+            Start MassTransit bus
+            </summary>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:CloudEventsDemo.ConsoleA.MassTransitConsoleHostedService.StopAsync(System.Threading.CancellationToken)">
+            <summary>
+            Stop MassTransit bus
+            </summary>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="T:CloudEventsDemo.ConsoleA.BasicPayload">
+            <summary>
+            Sample producer payload
+            </summary>
+        </member>
+        <member name="M:CloudEventsDemo.ConsoleA.BasicPayload.#ctor">
+            <summary>
+            Default ctor
+            </summary>
+        </member>
+        <member name="M:CloudEventsDemo.ConsoleA.BasicPayload.#ctor(System.Collections.Generic.List{System.String})">
+            <summary>
+            Ctor with a collection of tags
+            </summary>
+            <param name="tags"></param>
+        </member>
+        <member name="P:CloudEventsDemo.ConsoleA.BasicPayload.Id">
+            <summary>
+            Id
+            </summary>
+        </member>
+        <member name="P:CloudEventsDemo.ConsoleA.BasicPayload.Description">
+            <summary>
+            Description
+            </summary>
+        </member>
+        <member name="P:CloudEventsDemo.ConsoleA.BasicPayload.Tags">
+            <summary>
+            Collection of tags
+            </summary>
+        </member>
+        <member name="T:CloudEventsDemo.ConsoleA.Publisher.IBusinessService">
+            <summary>
+            Interface for a sample service which publishes events
+            </summary>
+        </member>
+        <member name="M:CloudEventsDemo.ConsoleA.Publisher.IBusinessService.DoStuff(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Publish an <see cref="T:CloudEventsDemo.ProducerContracts.AEvent">AEvent</see> with <see cref="T:CloudEventsDemo.ConsoleA.BasicPayload">BasicPayload</see>
+            </summary>
+            <param name="requestContextInfo"></param>
+            <param name="cToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:CloudEventsDemo.ConsoleA.Publisher.IBusinessService.DoMoreStuff(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Publish an <see cref="T:CloudEventsDemo.ProducerContracts.AEvent">AEvent</see> with <see cref="T:CloudEventsDemo.ConsoleA.ExtendedPayload">BasicPayload</see>
+            </summary>
+            <param name="requestContextInfo"></param>
+            <param name="cToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:CloudEventsDemo.ConsoleA.Publisher.IBusinessService.DoStuffWithATwist(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Publish an <see cref="T:CloudEventsDemo.Contracts.IGenericEvent`1">IGenericPublisherEvent&lt;CEvent&gt;</see> with <see cref="T:CloudEventsDemo.ConsoleA.BasicPayload">BasicPayload</see>
+            </summary>
+            <param name="requestContextInfo"></param>
+            <param name="cToken"></param>
+            <returns></returns>
+        </member>
+        <member name="T:CloudEventsDemo.ConsoleA.Publisher.BusinessService">
+            <summary>
+            Sample service which publishes events
+            <list type="bullet">
+            <item>
+            <description>Two <see cref="T:CloudEventsDemo.ProducerContracts.AEvent">AEvent</see> events with different payloads: <see cref="T:CloudEventsDemo.ConsoleA.BasicPayload">BasicPayload</see> and <see cref="T:CloudEventsDemo.ConsoleA.ExtendedPayload">ExtendedPayload</see> respectively</description>
+            </item>
+            <item>
+            <description>one <see cref="T:CloudEventsDemo.Contracts.IGenericEvent`1">IGenericPublisherEvent&lt;CEvent&gt;</see> event with <see cref="T:CloudEventsDemo.ConsoleA.BasicPayload">BasicPayload</see></description>
+            </item>
+            </list>
+            </summary>
+            <remarks>Events are typically published while executing ops associated with a service's business logic</remarks>
+        </member>
+        <member name="M:CloudEventsDemo.ConsoleA.Publisher.BusinessService.#ctor(MassTransit.IPublishEndpoint,CloudEventsDemo.Serialization.ICloudEventWriter,Microsoft.Extensions.Logging.ILogger{CloudEventsDemo.ConsoleA.Publisher.BusinessService})">
+            <summary>
+            Ctor with a publish endpoint, event writer and logger
+            </summary>
+            <param name="publishEndpoint"></param>
+            <param name="ceWriter"></param>
+            <param name="logger"></param>
+        </member>
+        <member name="M:CloudEventsDemo.ConsoleA.Publisher.BusinessService.DoStuff(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Publish an <see cref="T:CloudEventsDemo.ProducerContracts.AEvent">AEvent</see> with <see cref="T:CloudEventsDemo.ConsoleA.BasicPayload">BasicPayload</see>
+            </summary>
+            <param name="requestContextInfo"></param>
+            <param name="cToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:CloudEventsDemo.ConsoleA.Publisher.BusinessService.DoMoreStuff(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Publish an <see cref="T:CloudEventsDemo.ProducerContracts.AEvent">AEvent</see> with <see cref="T:CloudEventsDemo.ConsoleA.ExtendedPayload">BasicPayload</see>
+            </summary>
+            <param name="requestContextInfo"></param>
+            <param name="cToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:CloudEventsDemo.ConsoleA.Publisher.BusinessService.DoStuffWithATwist(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Publish an <see cref="T:CloudEventsDemo.Contracts.IGenericEvent`1">IGenericPublisherEvent&lt;CEvent&gt;</see> with <see cref="T:CloudEventsDemo.ConsoleA.BasicPayload">BasicPayload</see>
+            </summary>
+            <param name="requestContextInfo"></param>
+            <param name="cToken"></param>
+            <returns></returns>
+        </member>
+        <member name="T:CloudEventsDemo.ConsoleA.ExtendedPayload">
+            <summary>
+            Variation/extension of the sample consumer payload
+            </summary>
+        </member>
+        <member name="F:CloudEventsDemo.ConsoleA.Program.subscriberTypeMappings">
+            <summary>
+             Consumer-managed mapping between 
+             declarative CloudEvents types AND 
+             actual .NET types used to deserialize the event payload
+            </summary>
+        </member>
+        <member name="M:CloudEventsDemo.ConsoleA.Program.WorkloadSerialization">
+            <summary>
+            Serialization of CloudEvents envelope, type mappings
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -8,8 +8,7 @@ namespace CloudEventsDemo.Contracts
     /// Generic publisher event, with event data stored as a byte array.
     /// Use with domain-specific events as generic parameter.
     /// </summary>
-    public interface IGenericEvent<T>
+    public interface IGenericEvent<T> : IEvent
     {
-        byte[] EventData { get; set; }
     }
 }

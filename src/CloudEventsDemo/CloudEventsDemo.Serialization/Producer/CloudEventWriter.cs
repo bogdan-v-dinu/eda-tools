@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Mime;
+using System.Reflection;
 using System.Text;
 
 namespace CloudEventsDemo.Serialization
@@ -71,6 +72,22 @@ namespace CloudEventsDemo.Serialization
             this._logger = logger;
         }
 
+        protected string RetrievePayloadId<T>(T pLoad)
+        {
+            var result = default(string);
+
+            var idPropertyInfo = pLoad.GetType()
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .FirstOrDefault(pInfo => "id".Equals(pInfo.Name, StringComparison.InvariantCultureIgnoreCase));
+
+            if (idPropertyInfo != null)
+            {
+                result = idPropertyInfo.GetValue(pLoad, null).ToString();
+            }
+
+            return result;
+        }
+
         #region ICloudEventWriter implementation
 
         public List<IPayloadSerializationFormatter> PayloadFormatters 
@@ -93,7 +110,7 @@ namespace CloudEventsDemo.Serialization
                     // param defaults
                     if (String.IsNullOrWhiteSpace(pLoadId))
                     {
-                        pLoadId = Guid.NewGuid().ToString(); // could check for an Id property first, using reflection
+                        pLoadId = RetrievePayloadId<T>(pLoad) ?? Guid.NewGuid().ToString(); 
                     }
                     if (String.IsNullOrWhiteSpace(pLoadType))
                     {

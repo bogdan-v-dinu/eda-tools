@@ -4,6 +4,9 @@ using System.Text;
 
 namespace CloudEventsDemo.ConsoleA
 {
+    /// <summary>
+    /// Variation/extension of the sample consumer payload
+    /// </summary>
     class ExtendedPayload : BasicPayload
     {
         public ExtendedPayload() : this(null)

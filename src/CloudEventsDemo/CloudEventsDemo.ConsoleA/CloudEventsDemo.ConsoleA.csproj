@@ -1,8 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>C:\gh\bogdan-v-dinu\eda-tools\src\CloudEventsDemo\CloudEventsDemo.ConsoleA\CloudEventsDemo.ConsoleA.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,7 +19,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CloudEventDemo.MessageBrokerExtensions\CloudEventsDemo.MessageBrokerExtensions.csproj" />
     <ProjectReference Include="..\CloudEventsDemo.Contracts\CloudEventsDemo.Contracts.csproj" />
+    <ProjectReference Include="..\CloudEventsDemo.ProducerContracts\CloudEventsDemo.ProducerContracts.csproj" />
     <ProjectReference Include="..\CloudEventsDemo.Serialization\CloudEventsDemo.Serialization.csproj" />
   </ItemGroup>
 

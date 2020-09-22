@@ -1,4 +1,6 @@
 ﻿using CloudEventsDemo.Contracts;
+using CloudEventsDemo.MessageBrokerExtensions;
+using CloudEventsDemo.ProducerContracts;
 using CloudEventsDemo.Serialization;
 using MassTransit;
 using Microsoft.Extensions.Logging;
@@ -10,27 +12,50 @@ using System.Threading.Tasks;
 namespace CloudEventsDemo.ConsoleA.Publisher
 {
     /// <summary>
-    /// Interface for a demo service which publishes events
+    /// Interface for a sample service which publishes events
     /// </summary>
     public interface IBusinessService
     {
+        /// <summary>
+        /// Publish an <see cref="AEvent">AEvent</see> with <see cref="BasicPayload">BasicPayload</see>
+        /// </summary>
+        /// <param name="requestContextInfo"></param>
+        /// <param name="cToken"></param>
+        /// <returns></returns>
         Task DoStuff(string requestContextInfo,
             CancellationToken cToken = default(CancellationToken));
 
+        /// <summary>
+        /// Publish an <see cref="AEvent">AEvent</see> with <see cref="ExtendedPayload">BasicPayload</see>
+        /// </summary>
+        /// <param name="requestContextInfo"></param>
+        /// <param name="cToken"></param>
+        /// <returns></returns>
         Task DoMoreStuff(string requestContextInfo,
             CancellationToken cToken = default(CancellationToken));
 
+        /// <summary>
+        /// Publish an <see cref="IGenericEvent{CEvent}">IGenericPublisherEvent&lt;CEvent&gt;</see> with <see cref="BasicPayload">BasicPayload</see>
+        /// </summary>
+        /// <param name="requestContextInfo"></param>
+        /// <param name="cToken"></param>
+        /// <returns></returns>
         Task DoStuffWithATwist(string requestContextInfo,
             CancellationToken cToken = default(CancellationToken));
     }
 
     /// <summary>
-    /// Publishes two <see cref="cref="AEvent">AEvent</see> events with different payloads: <see cref="cref="BasicPayload">BasicPayload</see> and <see cref="cref="ExtendedPayload">ExtendedPayload</see> respectively.
-    /// Publishes one <see cref="cref="IGenericEvent{CEvent}">IGenericPublisherEvent&lt;CEvent&gt;</see> event with <see cref="cref="BasicPayload">BasicPayload</see>
+    /// Sample service which publishes events
+    /// <list type="bullet">
+    /// <item>
+    /// <description>Two <see cref="AEvent">AEvent</see> events with different payloads: <see cref="BasicPayload">BasicPayload</see> and <see cref="ExtendedPayload">ExtendedPayload</see> respectively</description>
+    /// </item>
+    /// <item>
+    /// <description>one <see cref="IGenericEvent{CEvent}">IGenericPublisherEvent&lt;CEvent&gt;</see> event with <see cref="BasicPayload">BasicPayload</see></description>
+    /// </item>
+    /// </list>
     /// </summary>
-    /// <remarks>
-    /// Events are typically published while executing ops associated with a service's business logic
-    /// </remarks>
+    /// <remarks>Events are typically published while executing ops associated with a service's business logic</remarks>
     public class BusinessService : IBusinessService
     {
         private readonly IPublishEndpoint _publishEndpoint;
@@ -39,6 +64,12 @@ namespace CloudEventsDemo.ConsoleA.Publisher
 
         private readonly ILogger<BusinessService> _logger;
 
+        /// <summary>
+        /// Ctor with a publish endpoint, event writer and logger
+        /// </summary>
+        /// <param name="publishEndpoint"></param>
+        /// <param name="ceWriter"></param>
+        /// <param name="logger"></param>
         public BusinessService(IPublishEndpoint publishEndpoint, ICloudEventWriter ceWriter, 
             ILogger<BusinessService> logger)
         {
@@ -56,8 +87,22 @@ namespace CloudEventsDemo.ConsoleA.Publisher
             _logger.LogError($"{source}: failed with exception '{ex.Message}', of type '{ex.GetType().Name}', details '{errDetails}'");
         }
 
+        protected async Task Publish<TPayload,TEvent>(TPayload payload, string eventSubject = null,
+            CancellationToken cToken = default(CancellationToken)) where TEvent : class
+        {
+            await _publishEndpoint.PublishCloudEvent<TPayload, TEvent>(
+                _ceWriter, payload, eventSubject: eventSubject,
+                cToken);
+        }
+
         #region IBusinessService implementation
 
+        /// <summary>
+        /// Publish an <see cref="AEvent">AEvent</see> with <see cref="BasicPayload">BasicPayload</see>
+        /// </summary>
+        /// <param name="requestContextInfo"></param>
+        /// <param name="cToken"></param>
+        /// <returns></returns>
         public async Task DoStuff(string requestContextInfo,
             CancellationToken cToken = default(CancellationToken))
         {
@@ -70,12 +115,8 @@ namespace CloudEventsDemo.ConsoleA.Publisher
                     Tags = new List<string>() { "tag0000", "tag1000", "tag2000", "tag3000" }
                 };
 
-                await _publishEndpoint.Publish<AEvent>(new
-                    {
-                        EventData = _ceWriter.GetBytes<BasicPayload>(basicPayload,
-                                            pLoadId: basicPayload.Id.ToString(), eventSubject: requestContextInfo)
-                    },
-                    cToken);
+                await Publish<BasicPayload, AEvent>(
+                    basicPayload, requestContextInfo, cToken); // request context -> event subject
 
                 _logger.LogInformation($"DoStuff: Published an AEvent with `{basicPayload.GetType().Name}` data; event context '{requestContextInfo}'");
             }
@@ -86,6 +127,12 @@ namespace CloudEventsDemo.ConsoleA.Publisher
             }
         }
 
+        /// <summary>
+        /// Publish an <see cref="AEvent">AEvent</see> with <see cref="ExtendedPayload">BasicPayload</see>
+        /// </summary>
+        /// <param name="requestContextInfo"></param>
+        /// <param name="cToken"></param>
+        /// <returns></returns>
         public async Task DoMoreStuff(string requestContextInfo,
             CancellationToken cToken = default(CancellationToken))
         {
@@ -99,12 +146,8 @@ namespace CloudEventsDemo.ConsoleA.Publisher
                     Properties = new Dictionary<string, object>() { { "p0", "v0" }, { "p1", "v1" } }
                 };
 
-                await _publishEndpoint.Publish<AEvent>(new
-                    {
-                        EventData = _ceWriter.GetBytes<ExtendedPayload>(extendedPayload,
-                                    pLoadId: extendedPayload.Id.ToString(), eventSubject: requestContextInfo)
-                    },
-                    cToken);
+                await Publish<ExtendedPayload, AEvent>(
+                    extendedPayload, requestContextInfo, cToken); // request context -> event subject
 
                 _logger.LogInformation($"DoMoreStuff: Published an AEvent with `{extendedPayload.GetType().Name}` data; event context '{requestContextInfo}'");
             }
@@ -115,6 +158,12 @@ namespace CloudEventsDemo.ConsoleA.Publisher
             }
         }
 
+        /// <summary>
+        /// Publish an <see cref="IGenericEvent{CEvent}">IGenericPublisherEvent&lt;CEvent&gt;</see> with <see cref="BasicPayload">BasicPayload</see>
+        /// </summary>
+        /// <param name="requestContextInfo"></param>
+        /// <param name="cToken"></param>
+        /// <returns></returns>
         public async Task DoStuffWithATwist(string requestContextInfo,
             CancellationToken cToken = default(CancellationToken))
         {
@@ -127,12 +176,8 @@ namespace CloudEventsDemo.ConsoleA.Publisher
                     Tags = new List<string>() { "generic-tag0000", "generic-tag1000", "generic-tag2000", "generic-tag3000" }
                 };
 
-                await _publishEndpoint.Publish<IGenericEvent<CEvent>>(new
-                {
-                    EventData = _ceWriter.GetBytes<BasicPayload>(basicPayload,
-                                            pLoadId: basicPayload.Id.ToString(), eventSubject: requestContextInfo)
-                },
-                    cToken);
+                await Publish<BasicPayload, IGenericEvent<CEvent>>(
+                     basicPayload, requestContextInfo, cToken ); // request context -> event subject
 
                 _logger.LogInformation($"DoStuffWithATwist: Published an IGenericEvent<CEvent> with `{basicPayload.GetType().Name}` data; event context '{requestContextInfo}'");
             }

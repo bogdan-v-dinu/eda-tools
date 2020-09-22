@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MassTransit" Version="7.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CloudEventsDemo.Contracts\CloudEventsDemo.Contracts.csproj" />
+    <ProjectReference Include="..\CloudEventsDemo.Serialization\CloudEventsDemo.Serialization.csproj" />
+  </ItemGroup>
+
+</Project>

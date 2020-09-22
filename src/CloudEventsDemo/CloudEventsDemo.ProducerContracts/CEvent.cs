@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CloudEventsDemo.Contracts
+﻿namespace CloudEventsDemo.ProducerContracts
 {
     /// <summary>
     /// Event "C", where C represents a placeholder for the event description.

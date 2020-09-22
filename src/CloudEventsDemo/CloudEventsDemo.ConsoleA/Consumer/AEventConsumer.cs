@@ -1,4 +1,4 @@
-﻿using CloudEventsDemo.Contracts;
+﻿using CloudEventsDemo.ProducerContracts;
 using CloudEventsDemo.Serialization;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,35 +9,39 @@ using System.Threading.Tasks;
 
 namespace CloudEventsDemo.ConsoleA
 {
-    public class AEventConsumer : IConsumer<AEvent>
+    /// <summary>
+    /// Sample consumer for events of type AEvent
+    /// </summary>
+    public class AEventConsumer : EventConsumer<AEvent>
     {
-        ICloudEventReader _ceReader;
-
-        private readonly ILogger<AEventConsumer> _logger;
-
+        /// <summary>
+        /// Default ctor
+        /// </summary>
         public AEventConsumer()
         {
-            this._ceReader = HostHelpers.serviceProvider.GetService<ICloudEventReader>();
-            this._logger = HostHelpers.serviceProvider.GetService<ILogger<AEventConsumer>>();
         }
 
-        public AEventConsumer(ICloudEventReader ceReader, ILogger<AEventConsumer> logger)
+        /// <summary>
+        /// Ctor with CloudEvent(s) reader and logger
+        /// </summary>
+        /// <param name="ceReader"></param>
+        /// <param name="logger"></param>
+        public AEventConsumer(ICloudEventReader ceReader, ILogger<AEventConsumer> logger) : base(ceReader, logger)
         {
-            this._ceReader = ceReader;
-            this._logger = logger;
         }
 
         #region IConsumer<AEvent> implementation
 
-        public async Task Consume(ConsumeContext<AEvent> context)
+        /// <summary>
+        /// Consume <see cref="ProducerContracts.AEvent">AEvent(s)</see> 
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public async override Task Consume(ConsumeContext<AEvent> context)
         {
-            try
+            await ConsumeCloudEvent(context, payload =>
             {
-                _logger.LogInformation($"Consume: received AEvent with MessageId = '{context.MessageId}'");
-
-                object payload = _ceReader.GetPayload(context.Message.EventData);
-                
-                switch( payload )
+                switch (payload)
                 {
                     case ConsumerPayload consumerPayload:
                         _logger.LogInformation($"Consume: Payload for MessageId '{context.MessageId}' has mapped type = '{consumerPayload.GetType().Name}', content = '{JsonConvert.SerializeObject(consumerPayload)}'");
@@ -46,17 +50,7 @@ namespace CloudEventsDemo.ConsoleA
                         _logger.LogWarning($"'{this.GetType().Name}' cannot consume payloads of type {payload.GetType().Name}");
                         break;
                 }
-            }
-            catch(Exception ex)
-            {
-                var errDetails = ex.InnerException != null ?
-                    ex.InnerException.GetType().Name + " - " + ex.InnerException.Message :
-                    ex.StackTrace ?? "NA";
-
-                _logger.LogError($"Consume: failed with exception '{ex.Message}', of type '{ex.GetType().Name}', details '{errDetails}'");
-            }
-
-            await Task.CompletedTask;
+            });
         }
 
         #endregion
