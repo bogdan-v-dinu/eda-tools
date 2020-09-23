@@ -73,8 +73,16 @@ namespace CloudEventsDemo.ConsoleA
                     )
                     .AddMassTransit(x =>
                     {
+                        x.AddConsumer<AEventConsumer>(typeof(AEventConsumerDefinition)); // configure with ConsumerDefinition<T> implementation
+                        x.AddConsumer<CEventConsumer>(cfg =>
+                        {
+                            cfg.UseConcurrentMessageLimit(1);
+                            cfg.UseInMemoryOutbox();
+                        }); // inline configuration 
+
                         // figure out how to create consumers and inject ctor params from the DI service provider
                         // x.AddConsumer<AEventConsumer>(cfg => { new AEventConsumer(...)})
+
                         x.SetKebabCaseEndpointNameFormatter();
 
                         x.UsingInMemory((context, cfg) =>
@@ -84,7 +92,7 @@ namespace CloudEventsDemo.ConsoleA
                             cfg.ConfigureEndpoints(context);
                         });
 
-                        x.AddConsumersFromNamespaceContaining<AddConsumersMarker>(); // add all consumers found in cloudEventsDemo.ConsoleA
+                        //x.AddConsumersFromNamespaceContaining<AddConsumersMarker>(); // add all consumers found in cloudEventsDemo.ConsoleA
                     })
                     .AddTransient<ICloudEventWriter, CloudEventWriter>(sp =>
                     {

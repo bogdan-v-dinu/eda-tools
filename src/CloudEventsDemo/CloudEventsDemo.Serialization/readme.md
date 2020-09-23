@@ -17,7 +17,7 @@ WITHOUT CloudEvents transport-specific bindings and clients.
 
 Pros/Cons of such a setup are out-of scope for this wiki page.
 
-#How
+# How
 
 ## Producer
 

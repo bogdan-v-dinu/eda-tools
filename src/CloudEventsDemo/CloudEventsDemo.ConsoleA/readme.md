@@ -1,0 +1,1 @@
+﻿Sample console which sends and receives payloads in a CloudEvent(s) envelope using MassTransit.
