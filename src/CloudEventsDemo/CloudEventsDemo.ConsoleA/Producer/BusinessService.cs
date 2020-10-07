@@ -88,7 +88,7 @@ namespace CloudEventsDemo.ConsoleA.Publisher
         }
 
         protected async Task Publish<TPayload,TEvent>(TPayload payload, string eventSubject = null,
-            CancellationToken cToken = default(CancellationToken)) where TEvent : class
+            CancellationToken cToken = default(CancellationToken)) where TEvent : class, IEvent
         {
             await _publishEndpoint.PublishCloudEvent<TPayload, TEvent>(
                 _ceWriter, payload, eventSubject: eventSubject,

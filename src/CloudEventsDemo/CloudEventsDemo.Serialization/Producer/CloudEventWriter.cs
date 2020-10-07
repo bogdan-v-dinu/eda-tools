@@ -140,8 +140,10 @@ namespace CloudEventsDemo.Serialization
                         cEvent.Subject = eventSubject;
                     };
 
-                    // info
-                    _logger.LogInformation($"GetCloudEvent: created CloudEvents envelope specversion='{cEvent.SpecVersion}' type='{cEvent.Type}' source='{cEvent.Source.ToString()}' id='{cEvent.Id}' subject='{cEvent.Subject ?? "NA"}' content-type='{cEvent.DataContentType.MediaType}'");
+                    // info, with param list (reccomended for structured logging)
+                    _logger.LogInformation(
+                        "{MethodName}: created CloudEvents envelope specversion='{CloudEventsSpecVersion}' type='{CloudEventsDeclarativeType}' source='{CloudEventsSource}' id='{CloudEventsId}' subject='{CloudEventsSubject}' content-type='{CloudEventsDataContentType}'",
+                        "GetCloudEvent<T>", cEvent.SpecVersion, cEvent.Type, cEvent.Source.ToString(), cEvent.Id, cEvent.Subject ?? "NA", cEvent.DataContentType.MediaType);
                 }
                 catch (ArgumentException agEx)
                 {

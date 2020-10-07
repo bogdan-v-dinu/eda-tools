@@ -31,7 +31,7 @@ namespace CloudEventsDemo.Serialization
         {
             #region Check arguments
 
-            if ( pLoad == null && String.IsNullOrWhiteSpace(pLoad as string) )
+            if ( pLoad == null || String.IsNullOrWhiteSpace(pLoad as string) )
             { 
                 throw new ArgumentNullException("pLoad");
             }

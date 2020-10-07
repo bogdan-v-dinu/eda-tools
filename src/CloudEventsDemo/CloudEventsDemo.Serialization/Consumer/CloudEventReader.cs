@@ -91,7 +91,7 @@ namespace CloudEventsDemo.Serialization
                 {
                     if (!_typeMappings.ContainsKey(cEvent.Type.ToLower())) // type is a required envelope param
                     {
-                        throw new ArgumentException($"Subscriber lacks a type mapping for '{cEvent.Type.ToLower()}'", "CloudEvent.Type");
+                        throw new ArgumentException($"Subscriber lacks a type mapping for '{cEvent.Type.ToLower()}'", "cEvent");
                     }
 
                     var subscriberType = _typeMappings[cEvent.Type.ToLower()];
@@ -100,7 +100,7 @@ namespace CloudEventsDemo.Serialization
 
                     if (pLoadFormatter == null )
                     {
-                        throw new ArgumentException($"No subscriber formatter can deserialize a payload with content type '{pLoadContentType}'", "CloudEvent.DataContentType");
+                        throw new ArgumentException($"No subscriber formatter can deserialize a payload with content type '{pLoadContentType}'", "cEvent");
                     }
 
                     // debug/ max verbosity
